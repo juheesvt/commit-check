@@ -18,8 +18,14 @@ def get_commits(user, repo, since, until):
 
 if __name__ == "__main__":
 
-    user = "juheesvt"
-    repo = "commit-check"
+    user_list = [
+        {
+            "user": "juheesvt",
+            "repo": "algorithm",
+        },
+    ]
+
+    
 
     # UTC 시간대로 날짜와 시간 설정
     utc_zone = pytz.utc
@@ -35,11 +41,10 @@ if __name__ == "__main__":
     until = utc_time.date().isoformat()
 
 
-    commits = get_commits(user, repo, since, until)
-    if commits:
-        print(f"총 커밋 수: {len(commits)}")
-        for commit in commits:
-            print(f"- 커밋 메시지: {commit['commit']['message']}")
-    else:
-        print("커밋 정보가 없습니다")
+    no_commit_users = []
+    for user in user_list:
+        commits = get_commits(user["user"], user["repo"], since, until)
+        if not commits:
+            no_commit_users.append(user)
+    print(no_commit_users)
 
