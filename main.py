@@ -20,12 +20,36 @@ if __name__ == "__main__":
 
     user_list = [
         {
+            "name": "강주희",
             "user": "juheesvt",
             "repo": "algorithm",
         },
+        {
+            "name": "윤지현",
+            "user": "jihyun-Yun42",
+            "repo": "Algorithm",
+        },
+        {
+            "name": "전예린",
+            "user": "sweetyr928",
+            "repo": "JS-algorithm",
+        },
+        {
+            "name": "이진희",
+            "user": "Ljinyh",
+            "repo": "codingTest",
+        },
+        {
+            "name": "이보람",
+            "user": "E-ppo",
+            "repo": "codingTest_JS",
+        },
+        {
+            "name": "백경렬",
+            "user": "KyungRyeolBaek",
+            "repo": "Baekjoon",
+        },
     ]
-
-    
 
     # UTC 시간대로 날짜와 시간 설정
     utc_zone = pytz.utc
@@ -46,5 +70,7 @@ if __name__ == "__main__":
         commits = get_commits(user["user"], user["repo"], since, until)
         if not commits:
             no_commit_users.append(user)
-    print(no_commit_users)
+
+    for user in no_commit_users:
+        print(user["name"], end=" ")
 
