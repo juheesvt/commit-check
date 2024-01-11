@@ -1,6 +1,7 @@
 import requests
 import datetime
 import pytz
+import os
 
 def get_commits(user, repo, since, until):
     url=f"https://api.github.com/repos/{user}/{repo}/commits"
@@ -16,36 +17,50 @@ def get_commits(user, repo, since, until):
         return response.status_code
     
 
+def send_message_to_discord(time, commits, no_commit_users):
+    webhook_url = os.environ["WEBHHOK_URL"]
+    message = f"""**✅ {time.year}년 {time.month}월 {time.day} 기준 알고리즘 미제출자**\n"""
+    for user in no_commit_users:
+        message += f"- **{user['user']}**\n"
+
+    message += """\n✅ **알고리즘 저장소 커밋 내역**\n"""
+
+    for commit in commits:
+        message += f"- **{commit['author']['login']}** {commit['commit']['message']}\n"
+     
+    data = {"content": message}
+    response = requests.post(webhook_url, json=data)
+
+    if response.status_code == 204:
+        print("메시지가 성공적으로 전송되었습니다.")
+    else:
+        print("메시지 전송 실패.")
+    
+
 if __name__ == "__main__":
 
     user_list = [
         {
-            "name": "강주희",
             "user": "juheesvt",
             "repo": "algorithm",
         },
         {
-            "name": "윤지현",
             "user": "jihyun-Yun42",
             "repo": "Algorithm",
         },
         {
-            "name": "전예린",
             "user": "sweetyr928",
             "repo": "JS-algorithm",
         },
         {
-            "name": "이진희",
             "user": "Ljinyh",
             "repo": "codingTest",
         },
         {
-            "name": "이보람",
             "user": "E-ppo",
             "repo": "codingTest_JS",
         },
         {
-            "name": "백경렬",
             "user": "KyungRyeolBaek",
             "repo": "Baekjoon",
         },
@@ -59,18 +74,22 @@ if __name__ == "__main__":
     local_time = datetime.datetime.now(local_zone)
     utc_time = local_time.astimezone(utc_zone)
 
-    # 'since'를 어제의 UTC 시간으로 설정
-    since = (utc_time - datetime.timedelta(days=1)).date().isoformat()
-    # 'until'을 오늘의 UTC 시간으로 설정
-    until = utc_time.date().isoformat()
+    # 'since'를 오늘 UTC 시간으로 설정
+    since = utc_time.date().isoformat()
+    # 'until'을 내일 UTC 시간으로 설정
+    until = (utc_time + datetime.timedelta(days=1)).date().isoformat()
 
+    print(since, until, local_time, utc_time)
 
+    commits = []
     no_commit_users = []
     for user in user_list:
-        commits = get_commits(user["user"], user["repo"], since, until)
-        if not commits:
-            no_commit_users.append(user)
+        commit = get_commits(user["user"], user["repo"], since, until)
 
-    for user in no_commit_users:
-        print(user["name"], end=" ")
+        if not commit:
+            no_commit_users.append(user)
+        else:
+            commits.append(commit[-1])
+
+    send_message_to_discord(utc_time, commits, no_commit_users)
 
