@@ -18,8 +18,8 @@ def get_commits(user, repo, since, until):
     
 
 def send_message_to_discord(time, commits, no_commit_users):
-    webhook_url = os.environ["WEBHHOK_URL"]
-    message = f"""**✅ {time.year}년 {time.month}월 {time.day} 기준 알고리즘 미제출자**\n"""
+    webhook_url = "https://discord.com/api/webhooks/1194585129843175556/TU3A0PdXE9ZtYoeWykIqEcgolJAjtY6lZlv6n5BA6i_1E4CQjJxjI6uv_be_HDOxyB-5"#os.environ["WEBHHOK_URL"]
+    message = f"""**✅ {time.year}년 {time.month}월 {time.day-1}일 기준 알고리즘 미제출자**\n"""
     for user in no_commit_users:
         message += f"- **{user['user']}**\n"
 
@@ -71,25 +71,26 @@ if __name__ == "__main__":
     local_zone = pytz.timezone('Asia/Seoul')  # 예시로 서울 시간대 사용
 
     # 현재 시간을 서울 시간대로 설정하고 UTC로 변환
-    local_time = datetime.datetime.now(local_zone)
-    utc_time = local_time.astimezone(utc_zone)
-
-    # 'since'를 오늘 UTC 시간으로 설정
-    since = utc_time.date().isoformat()
-    # 'until'을 내일 UTC 시간으로 설정
-    until = (utc_time + datetime.timedelta(days=1)).date().isoformat()
-
-    print(since, until, local_time, utc_time)
+    today = datetime.datetime.now()
+    
+    local_since_time = datetime.datetime.now(local_zone).replace(day=today.day-1 , hour=0, minute=0, second=0, microsecond=0)
+    local_until_time = datetime.datetime.now(local_zone).replace(day=today.day-1 , hour=23, minute=59, second=59, microsecond=999999)
+    
+    utc_since_time = local_since_time.astimezone(utc_zone)
+    utc_until_time = local_until_time.astimezone(utc_zone)
+    
+    print(utc_since_time, utc_until_time)
 
     commits = []
     no_commit_users = []
     for user in user_list:
-        commit = get_commits(user["user"], user["repo"], since, until)
+        commit = get_commits(user["user"], user["repo"], utc_since_time, utc_until_time)
 
         if not commit:
             no_commit_users.append(user)
         else:
             commits.append(commit[-1])
-
-    send_message_to_discord(utc_time, commits, no_commit_users)
+    for commit in commits:
+        print(commit['commit']['author']['name'], commit['commit']['message'])
+    send_message_to_discord(today, commits, no_commit_users)
 
