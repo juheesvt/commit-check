@@ -2,7 +2,7 @@ name: Commit Check
 
 on:
   schedule:
-    - cron: '59 14 * * *'  # 매일 14:59 UTC (서울 기준 23:59) '59 14 * * *'
+    - cron: '00 15 * * *'  # 매일 15:00 UTC (서울 기준 00:00) '00 15 * * *'
 
 jobs:
   check-commits:
