@@ -7,7 +7,7 @@ def get_commits(user, repo, since, until):
     url=f"https://api.github.com/repos/{user}/{repo}/commits"
     params = {
         'since': since,
-        'untile': until,
+        'until': until,
     }
 
     response = requests.get(url, params=params)
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     local_zone = pytz.timezone('Asia/Seoul')  # 예시로 서울 시간대 사용
 
     # 현재 시간을 서울 시간대로 설정하고 UTC로 변환
-    today = datetime.datetime.now()
+    today = datetime.datetime.now(local_zone)
     
     local_since_time = datetime.datetime.now(local_zone).replace(day=today.day-1, hour=0, minute=0, second=0, microsecond=0)
     local_until_time = datetime.datetime.now(local_zone).replace(day=today.day-1, hour=23, minute=59, second=59, microsecond=999999)
@@ -89,6 +89,7 @@ if __name__ == "__main__":
         if not commit:
             no_commit_users.append(user)
         else:
+            print(commit)
             commits.append(commit[-1])
     for commit in commits:
         print(commit['commit']['author']['name'], commit['commit']['message'])
