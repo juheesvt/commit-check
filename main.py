@@ -73,8 +73,8 @@ if __name__ == "__main__":
     # 현재 시간을 서울 시간대로 설정하고 UTC로 변환
     today = datetime.datetime.now()
     
-    local_since_time = datetime.datetime.now(local_zone).replace(day=today.day-1 , hour=0, minute=0, second=0, microsecond=0)
-    local_until_time = datetime.datetime.now(local_zone).replace(day=today.day-1 , hour=23, minute=59, second=59, microsecond=999999)
+    local_since_time = datetime.datetime.now(local_zone).replace(day=today.day-1, hour=0, minute=0, second=0, microsecond=0)
+    local_until_time = datetime.datetime.now(local_zone).replace(day=today.day-1, hour=23, minute=59, second=59, microsecond=999999)
     
     utc_since_time = local_since_time.astimezone(utc_zone)
     utc_until_time = local_until_time.astimezone(utc_zone)
