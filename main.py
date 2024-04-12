@@ -2,9 +2,11 @@ import requests
 import datetime
 import pytz
 import os
+from pprint import pprint
+
 
 def get_commits(user, repo, since, until):
-    url=f"https://api.github.com/repos/{user}/{repo}/commits"
+    url = f"https://api.github.com/repos/{user}/{repo}/commits"
     params = {
         'since': since,
         'until': until,
@@ -15,18 +17,33 @@ def get_commits(user, repo, since, until):
         return response.json()
     else:
         return response.status_code
+
+
+def send_message_to_discord(users, start_time, end_time):
+    webhook_url = "https://discord.com/api/webhooks/1226796494133268540/Dm8UIIKZ0Ny0jo76NZKO7mZqU1WknxPF5e4o3hSJ1svzdx-mUjcoXH00SAjGn02IS79i"#os.environ["WEBHOOK_URL"]
+    # webhook_url = "https://discord.com/api/webhooks/1194699736985374871/iZOtI82F9uNuiZswrWcjKq2K_CSnscSD8VQxMXE96i2BWSSerEfI21i29nihvf0KaBOx"
+    message = f"""**✅ {start_time.year}년 {start_time.month}월 {start_time.day}일 ~ {end_time.year}년 {end_time.month}월 {end_time.day}일 기준 알고리즘 제출 목록**\n"""
+    message += "\n"
     
+    pprint(users)
+    for user in users:
+        message += f"\n- **{user['name']}** : {user['count']} 문제\n"
+        for date, commit_list in user["commit_list"].items():
+            message += f"  - {date} : \n"
+            for commit in commit_list:
+                message += f"    - {commit}\n"
 
-def send_message_to_discord(time, commits, no_commit_users):
-    webhook_url = "https://discord.com/api/webhooks/1194585129843175556/TU3A0PdXE9ZtYoeWykIqEcgolJAjtY6lZlv6n5BA6i_1E4CQjJxjI6uv_be_HDOxyB-5"#os.environ["WEBHHOK_URL"]
-    message = f"""**✅ {time.year}년 {time.month}월 {time.day-1}일 기준 알고리즘 미제출자**\n"""
-    for user in no_commit_users:
-        message += f"- **{user['user']}**\n"
+    message += """\n **벌금 제출자 **\n"""
 
-    message += """\n✅ **알고리즘 저장소 커밋 내역**\n"""
+    count = 0
+    for user in users:
+        if user["count"] < 3:
+            message += f"- **{user['name']}** : {(3 - user['count']) * 100}\n"
+            count += 1
 
-    for commit in commits:
-        message += f"- **{commit['author']['login']}** {commit['commit']['message']}\n"
+    if count == 0:
+        message += "이번주 벌금 제출자 없음 🎉🎉🎉\n"
+    message += "\n\n"
      
     data = {"content": message}
     response = requests.post(webhook_url, json=data)
@@ -35,34 +52,52 @@ def send_message_to_discord(time, commits, no_commit_users):
         print("메시지가 성공적으로 전송되었습니다.")
     else:
         print("메시지 전송 실패.")
-    
+
 
 if __name__ == "__main__":
 
     user_list = [
         {
+            "name": "강주희",
             "user": "juheesvt",
             "repo": "algorithm",
+            "commit_list": {},
+            "count": 0,
         },
         {
+            "name": "윤지현",
             "user": "jihyun-Yun42",
             "repo": "Algorithm",
+            "commit_list": {},
+            "count": 0
         },
         {
+            "name": "전예린",
             "user": "sweetyr928",
             "repo": "JS-algorithm",
+            "commit_list": {},
+            "count": 0
         },
         {
-            "user": "Ljinyh",
-            "repo": "codingTest",
+            "name": "최지훈",
+            "user": "ChoiJi92",
+            "repo": "algorithm",
+            "commit_list": {},
+            "count": 0
         },
         {
+            "name": "이보람",
             "user": "E-ppo",
-            "repo": "codingTest_JS",
+            "repo": "Algorithm",
+            "commit_list": {},
+            "count": 0
         },
         {
+            "name": "백경렬",
             "user": "KyungRyeolBaek",
             "repo": "Baekjoon",
+            "commit_list": {},
+            "count": 0
         },
     ]
 
@@ -72,26 +107,43 @@ if __name__ == "__main__":
 
     # 현재 시간을 서울 시간대로 설정하고 UTC로 변환
     today = datetime.datetime.now(local_zone)
-    
-    local_since_time = datetime.datetime.now(local_zone).replace(day=today.day-1, hour=0, minute=0, second=0, microsecond=0)
-    local_until_time = datetime.datetime.now(local_zone).replace(day=today.day-1, hour=23, minute=59, second=59, microsecond=999999)
-    
-    utc_since_time = local_since_time.astimezone(utc_zone)
-    utc_until_time = local_until_time.astimezone(utc_zone)
-    
-    print(utc_since_time, utc_until_time)
 
-    commits = []
-    no_commit_users = []
+    week_time_list = []
+    for i in range(7, 0, -1):
+        local_since_time = datetime.datetime.now(local_zone).replace(day=today.day-i, hour=0, minute=0, second=0, microsecond=0)
+        local_until_time = datetime.datetime.now(local_zone).replace(day=today.day-i, hour=23, minute=59, second=59, microsecond=999999)
+
+        utc_since_time = local_since_time.astimezone(utc_zone)
+        utc_until_time = local_until_time.astimezone(utc_zone)
+
+        week_time_list.append({
+            "since_time": utc_since_time,
+            "until_time": utc_until_time,
+        })
+
+    start_time = week_time_list[0]['since_time'].astimezone(local_zone)
+    end_time = week_time_list[-1]['until_time'].astimezone(local_zone)
+
+    print(f"{start_time} ~ {end_time}")
+
+    for day in week_time_list:
+        current_date = day["since_time"].astimezone(local_zone)
+        for user in user_list:
+            commits = get_commits(user["user"], user["repo"], day["since_time"], day["until_time"])
+
+            if not commits:
+                continue
+            else:
+                for commit in commits:
+                    if "Title" not in commit['commit']['message']:
+                        continue
+
+                    if current_date.date() not in user["commit_list"].keys():
+                        user["commit_list"][current_date.date()] = []
+                        user["commit_list"][current_date.date()].append(commit['commit']['message'])
+
     for user in user_list:
-        commit = get_commits(user["user"], user["repo"], utc_since_time, utc_until_time)
+        user['count'] = len(user['commit_list'].keys())
+        print(f"{user['name']} : {user['count']}")
 
-        if not commit:
-            no_commit_users.append(user)
-        else:
-            print(commit)
-            commits.append(commit[-1])
-    for commit in commits:
-        print(commit['commit']['author']['name'], commit['commit']['message'])
-    send_message_to_discord(today, commits, no_commit_users)
-
+    send_message_to_discord(user_list, start_time, end_time)
