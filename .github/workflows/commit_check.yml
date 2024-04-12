@@ -2,7 +2,7 @@ name: Commit Check
 
 on:
   schedule:
-    - cron: '00 15 * * *'  # 매일 15:00 UTC (서울 기준 00:00) '00 15 * * *'
+    - cron: "00 15 * * 0" # 매주 일요일 15:00 UTC (서울 기준 00:00) '00 15 * * *'
 
 jobs:
   check-commits:
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
+          python-version: "3.x"
 
       - name: Install dependencies
         run: |
