@@ -20,39 +20,53 @@ def get_commits(user, repo, since, until):
 
 
 def send_message_to_discord(users, start_time, end_time):
-    webhook_url = "https://discord.com/api/webhooks/1226796494133268540/Dm8UIIKZ0Ny0jo76NZKO7mZqU1WknxPF5e4o3hSJ1svzdx-mUjcoXH00SAjGn02IS79i"#os.environ["WEBHOOK_URL"]
-    # webhook_url = "https://discord.com/api/webhooks/1194699736985374871/iZOtI82F9uNuiZswrWcjKq2K_CSnscSD8VQxMXE96i2BWSSerEfI21i29nihvf0KaBOx"
+    webhook_url = os.environ["WEBHOOK_URL"]
     message = f"""**✅ {start_time.year}년 {start_time.month}월 {start_time.day}일 ~ {end_time.year}년 {end_time.month}월 {end_time.day}일 기준 알고리즘 제출 목록**\n"""
     message += "\n"
     
     pprint(users)
     for user in users:
-        message += f"\n- **{user['name']}** : {user['count']} 문제\n"
+
+        problem_count = 0
+        for date in user['commit_list'].keys():
+            problem_count += len(user['commit_list'][date])
+        message += f"\n- **{user['name']}** : {problem_count} 문제\n"
+
         for date, commit_list in user["commit_list"].items():
             message += f"  - {date} : \n"
             for commit in commit_list:
                 message += f"    - {commit}\n"
+
+        data = {"content": message}
+        response = requests.post(webhook_url, json=data)
+
+        if response.status_code == 204:
+            print("메시지가 성공적으로 전송되었습니다.")
+        else:
+            print(f"메시지 전송 실패: {response}")
+
+        message = ""
 
     message += """\n **벌금 제출자 **\n"""
 
     count = 0
     for user in users:
         if user["count"] < 3:
-            message += f"- **{user['name']}** : {(3 - user['count']) * 100}\n"
+            message += f"- **{user['name']}** : {(3 - user['count']) * 1000} 원\n"
             count += 1
 
     if count == 0:
         message += "이번주 벌금 제출자 없음 🎉🎉🎉\n"
     message += "\n\n"
-     
+
     data = {"content": message}
     response = requests.post(webhook_url, json=data)
 
     if response.status_code == 204:
         print("메시지가 성공적으로 전송되었습니다.")
     else:
-        print("메시지 전송 실패.")
-
+        print(f"메시지 전송 실패: {response}")
+     
 
 if __name__ == "__main__":
 
