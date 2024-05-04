@@ -155,6 +155,8 @@ if __name__ == "__main__":
                     if current_date.date() not in user["commit_list"].keys():
                         user["commit_list"][current_date.date()] = []
                         user["commit_list"][current_date.date()].append(commit['commit']['message'])
+                    else:
+                        user["commit_list"][current_date.date()].append(commit['commit']['message'])
 
     for user in user_list:
         user['count'] = len(user['commit_list'].keys())
