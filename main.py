@@ -1,5 +1,5 @@
 import requests
-import datetime
+from datetime import datetime, timedelta
 import pytz
 import os
 from pprint import pprint
@@ -26,7 +26,6 @@ def send_message_to_discord(users, start_time, end_time):
     
     pprint(users)
     for user in users:
-
         problem_count = 0
         for date in user['commit_list'].keys():
             problem_count += len(user['commit_list'][date])
@@ -120,12 +119,16 @@ if __name__ == "__main__":
     local_zone = pytz.timezone('Asia/Seoul')  # 예시로 서울 시간대 사용
 
     # 현재 시간을 서울 시간대로 설정하고 UTC로 변환
-    today = datetime.datetime.now(local_zone)
+    today = datetime.now(local_zone)
 
     week_time_list = []
     for i in range(7, 0, -1):
-        local_since_time = datetime.datetime.now(local_zone).replace(day=today.day-i, hour=0, minute=0, second=0, microsecond=0)
-        local_until_time = datetime.datetime.now(local_zone).replace(day=today.day-i, hour=23, minute=59, second=59, microsecond=999999)
+
+        local_since_time = today.replace(hour=0, minute=0, second=0, microsecond=0)
+        local_until_time = today.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+        local_since_time -= timedelta(days=i)        
+        local_until_time -= timedelta(days=i)
 
         utc_since_time = local_since_time.astimezone(utc_zone)
         utc_until_time = local_until_time.astimezone(utc_zone)
