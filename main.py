@@ -20,7 +20,7 @@ def get_commits(user, repo, since, until):
 
 
 def send_message_to_discord(users, start_time, end_time):
-    webhook_url = os.environ["WEBHOOK_URL"]
+    webhook_url = "https://discord.com/api/webhooks/1226796494133268540/Dm8UIIKZ0Ny0jo76NZKO7mZqU1WknxPF5e4o3hSJ1svzdx-mUjcoXH00SAjGn02IS79i"
     message = f"""**✅ {start_time.year}년 {start_time.month}월 {start_time.day}일 ~ {end_time.year}년 {end_time.month}월 {end_time.day}일 기준 알고리즘 제출 목록**\n"""
     message += "\n"
     
