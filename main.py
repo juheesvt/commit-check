@@ -98,13 +98,13 @@ if __name__ == "__main__":
             "commit_list": {},
             "count": 0
         },
-        # {
-        #     "name": "이보람",
-        #     "user": "E-ppo",
-        #     "repo": "Algorithm",
-        #     "commit_list": {},
-        #     "count": 0
-        # },
+        {
+            "name": "이보람",
+            "user": "E-ppo",
+            "repo": "Algorithm",
+            "commit_list": {},
+            "count": 0
+        },
         {
             "name": "백경렬",
             "user": "KyungRyeolBaek",
