@@ -152,7 +152,7 @@ if __name__ == "__main__":
                 continue
             else:
                 for commit in commits:
-                    if "Title" not in commit['commit']['message']:
+                    if "Title" not in commit['commit']['message'] or "Time" not in commit['commit']['message']:
                         continue
 
                     if current_date.date() not in user["commit_list"].keys():
