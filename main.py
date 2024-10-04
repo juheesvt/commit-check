@@ -1,8 +1,10 @@
 import requests
 from datetime import datetime, timedelta
 import pytz
-import os
 from pprint import pprint
+
+import schedule
+import time
 
 
 def get_commits(user, repo, since, until):
@@ -23,7 +25,7 @@ def send_message_to_discord(users, start_time, end_time):
     webhook_url = "https://discord.com/api/webhooks/1226796494133268540/Dm8UIIKZ0Ny0jo76NZKO7mZqU1WknxPF5e4o3hSJ1svzdx-mUjcoXH00SAjGn02IS79i"
     message = f"""**✅ {start_time.year}년 {start_time.month}월 {start_time.day}일 ~ {end_time.year}년 {end_time.month}월 {end_time.day}일 기준 알고리즘 제출 목록**\n"""
     message += "\n"
-    
+
     pprint(users)
     for user in users:
         problem_count = 0
@@ -65,10 +67,9 @@ def send_message_to_discord(users, start_time, end_time):
         print("메시지가 성공적으로 전송되었습니다.")
     else:
         print(f"메시지 전송 실패: {response}")
-     
 
-if __name__ == "__main__":
 
+def main():
     user_list = [
         {
             "name": "강주희",
@@ -127,7 +128,7 @@ if __name__ == "__main__":
         local_since_time = today.replace(hour=0, minute=0, second=0, microsecond=0)
         local_until_time = today.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-        local_since_time -= timedelta(days=i)        
+        local_since_time -= timedelta(days=i)
         local_until_time -= timedelta(days=i)
 
         utc_since_time = local_since_time.astimezone(utc_zone)
@@ -166,3 +167,11 @@ if __name__ == "__main__":
         print(f"{user['name']} : {user['count']}")
 
     send_message_to_discord(user_list, start_time, end_time)
+
+
+if __name__ == "__main__":
+    schedule.every().monday.at("00:00").do(main)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
